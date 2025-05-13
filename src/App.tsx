@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import { CanvasComponent } from './components/CanvasComponent';
 import { ControlsComponent } from './components/ControlsComponent';
 import './index.css'; // Assuming your Tailwind base styles are here or in main.tsx
