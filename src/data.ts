@@ -47,6 +47,16 @@ export const treeTypes: TreeType[] = [
         url: "/assets/english_bark_3.png",
         altText: "English Oak Bark Texture 3",
       },
+      {
+        id: "eng4",
+        url: "/assets/english_bark_4.png",
+        altText: "English Oak Bark Texture 4",
+      },
+      {
+        id: "eng5",
+        url: "/assets/english_bark_5.png",
+        altText: "English Oak Bark Texture 5",
+      },
       // Add more English Oak images if you have them
     ],
   },
