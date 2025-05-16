@@ -94,28 +94,24 @@ export const useEffectStore = create<EffectState>((set, get) => ({
       : null, // Fallback to first if only one image
 
   selectTreeType: (treeId: string) => {
-    const selectedTree = get().availableTreeTypes.find(
-      (tree) => tree.id === treeId
-    );
+    const selectedTree = get().availableTreeTypes.find((tree) => tree.id === treeId);
     if (selectedTree && selectedTree.images.length > 0) {
       const imageA = selectedTree.images[0].url;
-      // If only one image, use it for both A and B (no fade, just static)
-      // If two or more, use the first two.
-      const imageB =
-        selectedTree.images.length > 1
-          ? selectedTree.images[1].url
-          : selectedTree.images[0].url;
+      const imageB = selectedTree.images.length > 1
+        ? selectedTree.images[1].url
+        : selectedTree.images[0].url;
+
       set({
         selectedTreeTypeId: treeId,
         currentImageA_url: imageA,
         currentImageB_url: imageB,
-        // Reset other cycling-related state here in the future (e.g., currentIndex)
       });
+
+      get().shuffleImages(treeId); // Shuffle order and update indices
     } else {
       console.warn(`Tree type with id "${treeId}" not found or has no images.`);
-      // Optionally clear images or set to a default placeholder
       set({
-        selectedTreeTypeId: treeId, // Still set the ID so UI can reflect selection attempt
+        selectedTreeTypeId: treeId,
         currentImageA_url: null,
         currentImageB_url: null,
       });

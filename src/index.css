@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "MyCustomFont";
+  src: url("src/fonts/MarrSansCondensed-Bold-Trial.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: "MyCustomFont", sans-serif;
+}
+
+@theme {
+    --font-sans: "MyCustomFont", sans-serif;
+  }

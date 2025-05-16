@@ -1,5 +1,4 @@
 // src/components/ControlsComponent.tsx
-import React from "react";
 import { useEffectStore } from "../store/store";
 import { predefinedColorSchemes, type ColorScheme } from "../data";
 import { pulsePresets } from "../data/pulsePresets";
@@ -26,16 +25,21 @@ export function ControlsComponent() {
   const isRecording = useEffectStore((s) => s.isRecording);
 
   return (
-    <div className="p-4 space-y-6 bg-opacity-50 text-[#24330D] rounded-lg w-full">
-      {/* Canvas Size Controls */}
+    <div className="divide-y divide-[#24330D] bg-opacity-50 text-[#24330D] w-full max-w-none border-r-1 border-t-1 border-b-1">
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <h1 className="text-3xl font-bold mb-3 mt-3 ml-3 text-[#24330D]">
+          Texture Generator
+        </h1>
+      </div>
+      {/* Canvas Size Controls */}
+      <div className="border-t-1 border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
           Canvas Size (px):
         </label>
         <div className="flex gap-2">
           <input
             type="number"
-            className="w-1/2 px-3 py-1 rounded border border-gray-300 text-sm"
+            className="w-1/2 px-3 py-1 border-2 border-gray-300 text-sm"
             placeholder="Width"
             value={useEffectStore((s) => s.canvasWidth)}
             onChange={(e) => {
@@ -48,7 +52,7 @@ export function ControlsComponent() {
           />
           <input
             type="number"
-            className="w-1/2 px-3 py-1 rounded border border-gray-300 text-sm"
+            className="w-1/2 px-3 py-1 border-2 border-gray-300 text-sm"
             placeholder="Height"
             value={useEffectStore((s) => s.canvasHeight)}
             onChange={(e) => {
@@ -63,10 +67,10 @@ export function ControlsComponent() {
       </div>
 
       {/* Threshold Slider (existing) */}
-      <div>
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
         <label
           htmlFor="thresholdValue"
-          className="block text-sm font-medium mb-1"
+          className="block text-sm font-medium mb-1 text-left uppercase"
         >
           Threshold:{" "}
           <span className="font-mono bg-gray-300 text-gray-700 px-1 rounded">
@@ -86,15 +90,17 @@ export function ControlsComponent() {
       </div>
 
       {/* Color Scheme Buttons (existing) */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Colour Scheme:</label>
-        <div className="grid grid-cols-3 gap-2">
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Colour Scheme:
+        </label>
+        <div className="grid grid-cols-6 gap-2">
           {predefinedColorSchemes.map((scheme) => (
             <button
               key={scheme.name}
               title={scheme.name}
               onClick={() => handleSchemeSelect(scheme)}
-              className={`w-full aspect-square rounded-md focus:outline-none transition-all duration-150 ease-in-out
+              className={`aspect-square w-12 focus:outline-none transition-all duration-150 ease-in-out
                           ${
                             activeColorSchemeName === scheme.name
                               ? "ring-2 ring-offset-2 ring-[#335402] ring-offset-[#cdc9bf]"
@@ -118,24 +124,21 @@ export function ControlsComponent() {
         </div>
       </div>
 
-      {/* NEW: Tree Type Selection Buttons */}
-      <div>
-        <label className="block text-sm font-medium mb-2">
-          Form (Tree Type):
+      {/* Tree Type Selection Buttons */}
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Texture Form (Bark + Foliage):
         </label>
-        <div className="grid grid-cols-2 gap-3">
-          {" "}
-          {/* Or grid-cols-3 if more types */}
+        <div className="grid grid-cols-3 gap-2">
           {availableTreeTypes.map((tree) => (
             <button
               key={tree.id}
               onClick={() => handleTreeSelect(tree.id)}
-              className={`px-4 py-3 rounded-md text-sm font-semibold focus:outline-none transition-colors duration-150 ease-in-out shadow
-                          ${
-                            selectedTreeTypeId === tree.id
-                              ? "bg-[#335402] text-white hover:bg-opacity-90"
-                              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-                          }`}
+              className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] ${
+                selectedTreeTypeId === tree.id
+                  ? "bg-[#24330D] text-[#D2F49E]"
+                  : "bg-transparent text-[#24330D]"
+              }`}
               aria-pressed={selectedTreeTypeId === tree.id}
             >
               {tree.name}
@@ -144,20 +147,22 @@ export function ControlsComponent() {
         </div>
       </div>
       {/* Pulse Control Buttons */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Tree Pulse:</label>
-        <div className="flex gap-2">
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Tree Pulse:
+        </label>
+        <div className="grid grid-cols-2 gap-2">
           {pulsePresets.map((preset) => (
             <button
               key={preset.name}
               onClick={() =>
                 useEffectStore.getState().setPulseProfile(preset.name)
               }
-              className={`px-3 py-2 rounded-md text-sm font-semibold shadow transition-all duration-150 ease-in-out
+              className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D]
           ${
             useEffectStore.getState().activePulseName === preset.name
-              ? "bg-[#335402] text-white"
-              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+              ? "bg-[#24330D] text-[#D2F49E]"
+              : "bg-transparent text-[#24330D]"
           }`}
             >
               {preset.name}
@@ -166,34 +171,38 @@ export function ControlsComponent() {
         </div>
       </div>
       {/* Export Buttons */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Export:</label>
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Export:
+        </label>
         <div className="flex-col flex gap-2">
           <button
             onClick={() => {
               console.log("Export Image button clicked");
               useEffectStore.getState().triggerImageExport?.();
             }}
-            className="w-full bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-md shadow hover:bg-gray-400 transition-all duration-150"
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D]"
           >
             Export Image
           </button>
           <button
             onClick={() => {
-              console.log(isRecording ? "Recording stopped" : "Recording started");
+              console.log(
+                isRecording ? "Recording stopped" : "Recording started"
+              );
               useEffectStore.getState().toggleRecording?.();
             }}
-            className={`w-full font-medium px-4 py-2 rounded-md shadow transition-all duration-150 ${
+            className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] ${
               isRecording
-                ? "bg-red-600 text-white animate-pulse hover:bg-red-700"
-                : "bg-gray-300 text-gray-700 hover:bg-red-600 hover:text-white"
+                ? "bg-red-600 text-white animate-pulse hover:bg-red-600"
+                : " text-[#24330D] hover:bg-red-600 hover:text-white"
             }`}
           >
             {isRecording ? "Recording..." : "Toggle Video Recording"}
           </button>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() =>
           useEffectStore
             .getState()
@@ -203,7 +212,7 @@ export function ControlsComponent() {
       >
         Export Format:{" "}
         {useEffectStore.getState().useFFmpeg ? "MP4 (H.264)" : "WebM"}
-      </button>
+      </button> */}
     </div>
   );
 }

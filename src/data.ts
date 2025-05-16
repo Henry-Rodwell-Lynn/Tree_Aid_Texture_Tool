@@ -7,11 +7,12 @@ export interface ColorScheme {
 }
 
 export const predefinedColorSchemes: ColorScheme[] = [
-  { name: "Forest Mist", color1: "#335402", color2: "#C7E3F6" }, // Default Green / Light Blue
-  { name: "Earthy Bark", color1: "#4A3B31", color2: "#A8B868" }, // Dark Brown / Yellow-Green
-  { name: "Sunset Grove", color1: "#24330D", color2: "#F9A03F" }, // Dark Green / Orange
-  { name: "Desert Bloom", color1: "#5C3D2E", color2: "#EFE2BA" }, // Dark Brown / Cream
-  { name: "Spring Leaf", color1: "#335402", color2: "#D4E09B" }, // Green / Light Yellow-Green
+  { name: "Forest Mist", color1: "#4B7D01", color2: "#335402" }, // Default Green / Light Blue
+  { name: "Earthy Bark", color1: "#D4D418", color2: "#BDBC1D" }, // Dark Brown / Yellow-Green
+  { name: "Sunset Grove", color1: "#C66420", color2: "#4E2F1D" }, // Dark Green / Orange
+  { name: "Desert Bloom", color1: "#FF9D58", color2: "#ECC996" }, // Dark Brown / Cream
+  { name: "Spring Leaf", color1: "#EACC7E", color2: "#F4F0E6" },
+  { name: "Spring Lesf", color1: "#FF9E3E", color2: "#FF8433" }, // Green / Light Yellow-Green
   // Add more schemes as needed
 ];
 
@@ -29,7 +30,7 @@ export interface TreeType {
 
 export const treeTypes: TreeType[] = [
   {
-    name: "English Oak",
+    name: "Oak",
     id: "english_oak",
     images: [
       {
@@ -77,5 +78,52 @@ export const treeTypes: TreeType[] = [
       // Add more Baobab images if you have them
     ],
   },
-  // Add more tree types later
+  {
+    name: "Shea",
+    id: "shea",
+    images: [
+      { id: "shea1", url: "/assets/shea_bark_1.png", altText: "Shea Bark Texture 1" },
+      { id: "shea2", url: "/assets/shea_bark_2.png", altText: "Shea Bark Texture 2" }
+    ]
+  },
+  {
+    name: "Moringa",
+    id: "moringa",
+    images: [
+      { id: "moringa1", url: "/assets/moringa_bark_1.png", altText: "Moringa Bark Texture 1" },
+      { id: "moringa2", url: "/assets/moringa_bark_2.png", altText: "Moringa Bark Texture 2" }
+    ]
+  },
+  {
+    name: "Mango",
+    id: "mango",
+    images: [
+      { id: "mango1", url: "/assets/mango_bark_1.png", altText: "Mango Bark Texture 1" },
+      { id: "mango2", url: "/assets/mango_bark_2.png", altText: "Mango Bark Texture 2" }
+    ]
+  },
+  {
+    name: "Cashew",
+    id: "cashew",
+    images: [
+      { id: "cashew1", url: "/assets/cashew_bark_1.png", altText: "Cashew Bark Texture 1" },
+      { id: "cashew2", url: "/assets/cashew_bark_2.png", altText: "Cashew Bark Texture 2" }
+    ]
+  },
+  {
+    name: "Acacia",
+    id: "acacia",
+    images: [
+      { id: "acacia1", url: "/assets/acacia_bark_1.png", altText: "Acacia Bark Texture 1" },
+      { id: "acacia2", url: "/assets/acacia_bark_2.png", altText: "Acacia Bark Texture 2" }
+    ]
+  },
+  {
+    name: "Foliage",
+    id: "foliage",
+    images: [
+      { id: "foliage1", url: "/assets/foliage_1.png", altText: "Foliage Texture 1" }
+    ]
+  },
+    
 ];

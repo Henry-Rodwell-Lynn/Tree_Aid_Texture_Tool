@@ -1,18 +1,18 @@
 // src/App.tsx
-import { CanvasComponent } from './components/CanvasComponent';
-import { ControlsComponent } from './components/ControlsComponent';
-import { useEffectStore } from './store/store';
-import './index.css'; // Assuming your Tailwind base styles are here or in main.tsx
+import { CanvasComponent } from "./components/CanvasComponent";
+import { ControlsComponent } from "./components/ControlsComponent";
+import { useEffectStore } from "./store/store";
+import "./index.css"; // Assuming your Tailwind base styles are here or in main.tsx
 
 function App() {
   const { canvasWidth, canvasHeight } = useEffectStore();
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#F4F0E6] text-gray-700 font-sans">
+    <div className="flex flex-col md:flex-row h-screen bg-[#ECC996] text-gray-700 font-sans">
       {/* Controls Panel */}
-      <aside className="w-72 lg:w-80 p-6 bg-[#cdc9bf] shadow-2xl overflow-y-auto flex-shrink-0">
-        <div className="sticky top-6">
-          <h1 className="text-3xl font-bold mb-6 text-[#24330D]">Texture Generator</h1>
+      <aside className="w-80 lg:w-96  bg-[#F4F0E6] shadow-2xl overflow-y-auto flex-shrink-0  border-[#24330D]">
+        <div className="sticky border-r-1">
+
           <ControlsComponent />
         </div>
       </aside>
@@ -22,7 +22,7 @@ function App() {
         <div className="w-max">
           <div
             style={{ width: `${canvasWidth}px`, height: `${canvasHeight}px` }}
-            className="rounded-lg overflow-hidden shadow-lg"
+            className="overflow-hidden"
           >
             <CanvasComponent />
           </div>
