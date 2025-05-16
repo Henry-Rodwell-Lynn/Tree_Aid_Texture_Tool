@@ -74,11 +74,6 @@ export const treeTypes: TreeType[] = [
         url: "/assets/baobab_bark_2.png",
         altText: "Baobab Bark Texture 2",
       },
-      {
-        id: "bao3",
-        url: "/assets/baobab_bark_3.png",
-        altText: "Baobab Bark Texture 3",
-      },
       // Add more Baobab images if you have them
     ],
   },

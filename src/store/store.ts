@@ -48,6 +48,17 @@ interface EffectState {
 
   isRecording: boolean;
   setIsRecording: (val: boolean) => void;
+
+  currentTextureIndex: number;
+  nextTextureIndex: number;
+  isFading: boolean;
+  setNextTextureIndex: (index: number) => void;
+  completeFade: () => void;
+
+  imageShuffleQueue: number[];
+  shuffleImages: (treeId: string) => void;
+
+  updateFadeState: () => void;
 }
 
 export const useEffectStore = create<EffectState>((set, get) => ({
@@ -147,4 +158,50 @@ export const useEffectStore = create<EffectState>((set, get) => ({
 
   isRecording: false,
   setIsRecording: (val) => set({ isRecording: val }),
+
+  currentTextureIndex: 0,
+  nextTextureIndex: 1,
+  isFading: false,
+
+  setNextTextureIndex: (index) => {
+    set({ nextTextureIndex: index, isFading: true });
+  },
+
+  completeFade: () => {
+    set((state) => ({
+      currentTextureIndex: state.nextTextureIndex,
+      isFading: false,
+    }));
+  },
+
+  updateFadeState: () => {
+    const { imageShuffleQueue, currentTextureIndex, selectedTreeTypeId } = get();
+    if (!selectedTreeTypeId || imageShuffleQueue.length === 0) return;
+
+    const currentIdx = imageShuffleQueue.indexOf(currentTextureIndex);
+    const nextIdx = (currentIdx + 1) % imageShuffleQueue.length;
+    set({
+      nextTextureIndex: imageShuffleQueue[nextIdx],
+      isFading: true,
+    });
+  },
+
+  imageShuffleQueue: [],
+  shuffleImages: (treeId: string) => {
+    const selectedTree = get().availableTreeTypes.find(t => t.id === treeId);
+    if (!selectedTree) return;
+
+    const indices = [...Array(selectedTree.images.length).keys()];
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+
+    set({
+      imageShuffleQueue: indices,
+      currentTextureIndex: indices[0],
+      nextTextureIndex: indices.length > 1 ? indices[1] : indices[0],
+      selectedTreeTypeId: treeId,
+    });
+  },
 }));
