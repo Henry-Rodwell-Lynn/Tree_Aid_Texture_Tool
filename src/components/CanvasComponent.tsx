@@ -247,11 +247,11 @@ export function CanvasComponent() {
     const fade = Math.min(elapsed / FADE_DURATION, 1);
     const easedFade = fade * fade * (3 - 2 * fade);
     const stableOpacities = fadingA.current
-      ? [1 - easedFade * 0.9, easedFade]
-      : [easedFade, 1 - easedFade * 0.9];
+      ? [1 - easedFade, easedFade]
+      : [easedFade, 1 - easedFade];
 
     // Debug log for opacity values during the transition
-    console.log(`[Render] Fade=${fade.toFixed(3)} easedFade=${easedFade.toFixed(3)} opacities=[${stableOpacities[0].toFixed(3)}, ${stableOpacities[1].toFixed(3)}] fadingA=${fadingA.current}`);
+    // console.log(`[Render] Fade=${fade.toFixed(3)} easedFade=${easedFade.toFixed(3)} opacities=[${stableOpacities[0].toFixed(3)}, ${stableOpacities[1].toFixed(3)}] fadingA=${fadingA.current}`);
 
 
     // If an image load is pending, skip drawing until it finishes
@@ -269,17 +269,22 @@ export function CanvasComponent() {
           lastTreeIdRef.current = selectedTree.id;
         }
 
-        const nextSlot = fadingA.current ? 1 : 0;
-        const currentIdx = imageIndices.current[1 - nextSlot];
-        const remainingIndices = selectedTree.images
+        const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
+        const availableIndices = selectedTree.images
           .map((_, idx) => idx)
-          .filter(idx => idx !== currentIdx);
-        const nextIdx = currentIdx === 0 ? 1 : 0;
+          .filter(idx => idx !== previousIdx);
+        const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
+
+        console.log(`[Debug] Previous Index: ${previousIdx}`);
+        console.log(`[Debug] Selected Next Index: ${nextIdx}`);
+        console.log(`[Debug] Updated imageIndices: [${imageIndices.current[0]}, ${imageIndices.current[1]}]`);
 
         const img = selectedTree.images[nextIdx];
         imageLoadPendingRef.current = true;
         preloadImage(img.url).then((image) => {
           const texture = gl.createTexture();
+          const nextSlot = fadingA.current ? 0 : 1;
           gl.activeTexture(gl.TEXTURE0 + nextSlot);
           gl.bindTexture(gl.TEXTURE_2D, texture);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -290,23 +295,23 @@ export function CanvasComponent() {
           const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
           gl.uniform1i(loc, nextSlot);
           textureRefs.current[nextSlot] = texture;
+          textureRefs.current[nextSlot] = texture;
           console.log(`[Debug] Texture ${nextIdx} bound to TEXTURE${nextSlot} → u_image${nextSlot + 1}`);
 
-          imageIndices.current[nextSlot] = nextIdx;
           console.log(`[Debug] Fade complete. Updated imageIndices: ${imageIndices.current.join(', ')} | nextSlot: ${nextSlot}`);
 
           console.log(`[Textures] Loaded texture for slot ${nextSlot}: index ${nextIdx}`);
           console.log(`[State] imageIndices: ${imageIndices.current[0]}, ${imageIndices.current[1]}`);
-          console.log(`[Fade] Image ${currentIdx} fading to ${nextIdx}. Next animation will be ${nextIdx} to ...`);
+          console.log(`[Fade] Image ${previousIdx} fading to ${nextIdx}. Next animation will be ${nextIdx} to ...`);
 
           fadeStartTimeRef.current = performance.now();
           console.log(`[Debug] New fade start time set`);
           setNextTextureIndex(nextIdx);
           completeFade();
-          fadingA.current = !fadingA.current;
           imageLoadPendingRef.current = false;
           // After loading, request next frame
           requestAnimationFrame(render);
+          fadingA.current = !fadingA.current;
         });
         // Skip frame draw while loading image
         return;
@@ -332,8 +337,8 @@ export function CanvasComponent() {
     }
 
     // Log which image is expected to be on top
-    const topImageSlot = fadingA.current ? 1 : 0;
-    console.log(`[Render] Drawing frame. Top image slot: ${topImageSlot}`);
+    // const topImageSlot = fadingA.current ? 1 : 0;
+    // console.log(`[Render] Drawing frame. Top image slot: ${topImageSlot}`);
 
     for (let i = 0; i < 2; i++) {
       if (textureRefs.current[i]) {
