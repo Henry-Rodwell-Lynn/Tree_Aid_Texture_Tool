@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/components/CanvasComponent.tsx
 declare global {
   interface Window {
@@ -17,8 +18,6 @@ export function CanvasComponent() {
     selectedTreeTypeId,
     canvasWidth,
     canvasHeight,
-    currentTextureIndex,
-    nextTextureIndex,
     setNextTextureIndex,
     completeFade,
   } = useEffectStore();
