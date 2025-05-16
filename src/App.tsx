@@ -11,7 +11,7 @@ function App() {
     <div className="flex flex-col md:flex-row h-screen bg-[#ECC996] text-gray-700 font-sans">
       {/* Controls Panel */}
       <aside className="w-80 lg:w-96  bg-[#F4F0E6] shadow-2xl overflow-y-auto flex-shrink-0  border-[#24330D]">
-        <div className="sticky border-r-1">
+        <div className="sticky border-r-1 m-2">
 
           <ControlsComponent />
         </div>

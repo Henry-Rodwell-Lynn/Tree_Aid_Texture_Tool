@@ -25,7 +25,7 @@ export function ControlsComponent() {
   const isRecording = useEffectStore((s) => s.isRecording);
 
   return (
-    <div className="divide-y divide-[#24330D] bg-opacity-50 text-[#24330D] w-full max-w-none border-r-1 border-t-1 border-b-1">
+    <div className="divide-y divide-[#24330D] bg-opacity-50 text-[#24330D] w-full max-w-none border-r-1 border-t-2 border-l-2 border-b-1">
       <div>
         <h1 className="text-3xl font-bold mb-3 mt-3 ml-3 text-[#24330D]">
           Texture Generator

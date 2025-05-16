@@ -82,48 +82,91 @@ export const treeTypes: TreeType[] = [
     name: "Shea",
     id: "shea",
     images: [
-      { id: "shea1", url: "/assets/shea_bark_1.png", altText: "Shea Bark Texture 1" },
-      { id: "shea2", url: "/assets/shea_bark_2.png", altText: "Shea Bark Texture 2" }
-    ]
+      {
+        id: "shea1",
+        url: "/assets/shea_1.png",
+        altText: "Shea Bark Texture 1",
+      },
+      {
+        id: "shea2",
+        url: "/assets/shea_2.png",
+        altText: "Shea Bark Texture 2",
+      },
+    ],
   },
   {
     name: "Moringa",
     id: "moringa",
     images: [
-      { id: "moringa1", url: "/assets/moringa_bark_1.png", altText: "Moringa Bark Texture 1" },
-      { id: "moringa2", url: "/assets/moringa_bark_2.png", altText: "Moringa Bark Texture 2" }
-    ]
+      {
+        id: "moringa1",
+        url: "/assets/moringa_1.png",
+        altText: "Moringa Bark Texture 1",
+      },
+      {
+        id: "moringa2",
+        url: "/assets/moringa_2.png",
+        altText: "Moringa Bark Texture 2",
+      },
+    ],
   },
   {
     name: "Mango",
     id: "mango",
     images: [
-      { id: "mango1", url: "/assets/mango_bark_1.png", altText: "Mango Bark Texture 1" },
-      { id: "mango2", url: "/assets/mango_bark_2.png", altText: "Mango Bark Texture 2" }
-    ]
+      {
+        id: "mango1",
+        url: "/assets/mango_bark_1.png",
+        altText: "Mango Bark Texture 1",
+      },
+      {
+        id: "mango2",
+        url: "/assets/mango_bark_2.png",
+        altText: "Mango Bark Texture 2",
+      },
+    ],
   },
   {
     name: "Cashew",
     id: "cashew",
     images: [
-      { id: "cashew1", url: "/assets/cashew_bark_1.png", altText: "Cashew Bark Texture 1" },
-      { id: "cashew2", url: "/assets/cashew_bark_2.png", altText: "Cashew Bark Texture 2" }
-    ]
+      {
+        id: "cashew1",
+        url: "/assets/cashew_bark_1.png",
+        altText: "Cashew Bark Texture 1",
+      },
+      {
+        id: "cashew2",
+        url: "/assets/cashew_bark_2.png",
+        altText: "Cashew Bark Texture 2",
+      },
+    ],
   },
   {
     name: "Acacia",
     id: "acacia",
     images: [
-      { id: "acacia1", url: "/assets/acacia_bark_1.png", altText: "Acacia Bark Texture 1" },
-      { id: "acacia2", url: "/assets/acacia_bark_2.png", altText: "Acacia Bark Texture 2" }
-    ]
+      {
+        id: "acacia1",
+        url: "/assets/acacia_bark_1.png",
+        altText: "Acacia Bark Texture 1",
+      },
+      {
+        id: "acacia2",
+        url: "/assets/acacia_bark_2.png",
+        altText: "Acacia Bark Texture 2",
+      },
+    ],
   },
   {
     name: "Foliage",
     id: "foliage",
     images: [
-      { id: "foliage1", url: "/assets/foliage_1.png", altText: "Foliage Texture 1" }
-    ]
+      {
+        id: "foliage1",
+        url: "/assets/foliage_1.png",
+        altText: "Foliage Texture 1",
+      },
+    ],
   },
-    
 ];
