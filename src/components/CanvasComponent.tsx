@@ -356,7 +356,7 @@ export function CanvasComponent() {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
-      className="w-full h-full rounded-lg"
+      className="w-full h-full"
     />
   );
 }

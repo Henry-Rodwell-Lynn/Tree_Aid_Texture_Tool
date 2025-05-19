@@ -167,6 +167,11 @@ export const treeTypes: TreeType[] = [
         url: "/assets/foliage_1.png",
         altText: "Foliage Texture 1",
       },
+      {
+        id: "foliage2",
+        url: "/assets/foliage_2.png",
+        altText: "Foliage Texture 2",
+      },
     ],
   },
 ];
