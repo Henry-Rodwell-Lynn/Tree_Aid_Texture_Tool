@@ -324,6 +324,10 @@ export function CanvasComponent() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.uniform2f(gl.getUniformLocation(program, 'u_resolution'), gl.canvas.width, gl.canvas.height);
+    // Automatic scale computation based on canvas aspect ratio
+    const canvasAspect = gl.canvas.width / gl.canvas.height;
+    const autoScale = canvasAspect > 1.0 ? canvasAspect : 1.0 / canvasAspect;
+    gl.uniform1f(gl.getUniformLocation(program, 'u_imageScale'), autoScale);
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurRadius'), state.blurRadius);
     gl.uniform1f(gl.getUniformLocation(program, 'u_thresholdValue'), state.thresholdValue);
     gl.uniform3fv(gl.getUniformLocation(program, 'u_duotoneColor1'), hexToRgbArray(state.duotoneColor1));
@@ -356,7 +360,7 @@ export function CanvasComponent() {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
-      className="w-full h-full"
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
     />
   );
 }

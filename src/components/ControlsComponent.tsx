@@ -89,6 +89,7 @@ export function ControlsComponent() {
         />
       </div>
 
+
       {/* Color Scheme Buttons (existing) */}
       <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
         <label className="block text-sm font-medium mb-2 text-left uppercase">
@@ -129,7 +130,7 @@ export function ControlsComponent() {
         <label className="block text-sm font-medium mb-2 text-left uppercase">
           Texture Form (Bark + Foliage):
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex flex-col gap-2">
           {availableTreeTypes.map((tree) => (
             <button
               key={tree.id}

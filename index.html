@@ -21,57 +21,73 @@
 
     <script id="fragment-shader" type="x-shader/x-fragment">
       precision mediump float;
-    
+
       varying vec2 v_texCoord;
-    
+
       uniform sampler2D u_image1;
       uniform sampler2D u_image2;
-    
+
       uniform float u_opacity1;
       uniform float u_opacity2;
-    
+
       uniform vec2 u_resolution;
       uniform float u_blurRadius;
       uniform float u_thresholdValue;
-    
+
       uniform vec3 u_duotoneColor1;
       uniform vec3 u_duotoneColor2;
-    
+      uniform float u_imageScale;
+
       float grayscale(vec3 color) {
           return dot(color, vec3(0.299, 0.587, 0.114));
       }
-    
+
       vec3 boxBlur(sampler2D image, vec2 uv, vec2 resolution, float radius) {
           if (radius <= 0.0) return texture2D(image, uv).rgb;
-    
+
           vec3 sum = vec3(0.0);
           vec2 pixelOffset = vec2(radius / resolution.x, radius / resolution.y);
-    
+
           sum += texture2D(image, uv + vec2(-pixelOffset.x, -pixelOffset.y)).rgb;
           sum += texture2D(image, uv + vec2( 0.0,          -pixelOffset.y)).rgb;
           sum += texture2D(image, uv + vec2( pixelOffset.x, -pixelOffset.y)).rgb;
-    
+
           sum += texture2D(image, uv + vec2(-pixelOffset.x,  0.0)).rgb;
           sum += texture2D(image, uv + vec2( 0.0,           0.0)).rgb;
           sum += texture2D(image, uv + vec2( pixelOffset.x,  0.0)).rgb;
-    
+
           sum += texture2D(image, uv + vec2(-pixelOffset.x,  pixelOffset.y)).rgb;
           sum += texture2D(image, uv + vec2( 0.0,           pixelOffset.y)).rgb;
           sum += texture2D(image, uv + vec2( pixelOffset.x,  pixelOffset.y)).rgb;
-    
+
           return sum / 9.0;
       }
-    
+
       void main() {
-          vec3 tex1 = boxBlur(u_image1, v_texCoord, u_resolution, u_blurRadius) * u_opacity1;
-          vec3 tex2 = boxBlur(u_image2, v_texCoord, u_resolution, u_blurRadius) * u_opacity2;
-    
+          vec2 uv = v_texCoord;
+
+          float canvasAspect = u_resolution.x / u_resolution.y;
+          float imageAspect = 1.0;
+
+          vec2 scale = vec2(1.0);
+          if (canvasAspect > imageAspect) {
+              scale.x = canvasAspect / imageAspect;
+          } else {
+              scale.y = imageAspect / canvasAspect;
+          }
+
+          scale /= u_imageScale;
+          uv = (v_texCoord - 0.5) * scale + 0.5;
+
+          vec3 tex1 = boxBlur(u_image1, uv, u_resolution, u_blurRadius) * u_opacity1;
+          vec3 tex2 = boxBlur(u_image2, uv, u_resolution, u_blurRadius) * u_opacity2;
+
           vec3 combined = tex1 + tex2;
-    
+
           float gray = grayscale(combined);
           float thresholded = step(u_thresholdValue, gray);
           vec3 finalColor = mix(u_duotoneColor1, u_duotoneColor2, thresholded);
-    
+
           gl_FragColor = vec4(finalColor, 1.0);
       }
     </script>

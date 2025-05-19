@@ -59,6 +59,9 @@ interface EffectState {
   shuffleImages: (treeId: string) => void;
 
   updateFadeState: () => void;
+
+  scale: number;
+  setScale: (scale: number) => void;
 }
 
 export const useEffectStore = create<EffectState>((set, get) => ({
@@ -200,4 +203,7 @@ export const useEffectStore = create<EffectState>((set, get) => ({
       selectedTreeTypeId: treeId,
     });
   },
+
+  scale: 1.0,
+  setScale: (scale) => set({ scale }),
 }));
