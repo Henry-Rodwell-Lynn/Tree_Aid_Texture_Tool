@@ -32,7 +32,6 @@ export function CanvasComponent() {
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
 
-  const isRecordingRef = useRef(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
 
@@ -66,9 +65,10 @@ export function CanvasComponent() {
 
     const toggleRecording = async () => {
       // If already recording, stop recording
-      if (isRecordingRef.current) {
+      if (useEffectStore.getState().isRecording) {
         console.log("[Recording] Stopping recording...");
         mediaRecorderRef.current?.stop();
+        useEffectStore.getState().setIsRecording(false);
         return;
       } else {
         const canvas = canvasRef.current;
@@ -78,7 +78,10 @@ export function CanvasComponent() {
         const stream = canvas.captureStream(30);
         recordedChunksRef.current = [];
 
-        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'video/webm',
+          videoBitsPerSecond: 10_000_000,
+        });
         mediaRecorderRef.current = mediaRecorder;
 
         mediaRecorder.ondataavailable = (e) => {
@@ -138,15 +141,11 @@ export function CanvasComponent() {
             a.click();
             URL.revokeObjectURL(url);
           }
-
-          isRecordingRef.current = false;
-          document.dispatchEvent(new CustomEvent('recording-status', { detail: { recording: false } }));
         };
 
         mediaRecorder.start();
         console.log("[Recording] MediaRecorder started.");
-        isRecordingRef.current = true;
-        document.dispatchEvent(new CustomEvent('recording-status', { detail: { recording: true } }));
+        useEffectStore.getState().setIsRecording(true);
       }
     };
 
@@ -360,7 +359,8 @@ export function CanvasComponent() {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      className='border-2 border-dashed border-[#24330D]'
+      style={{ width: '100%', height: '100%', objectFit: 'cover'}}
     />
   );
 }

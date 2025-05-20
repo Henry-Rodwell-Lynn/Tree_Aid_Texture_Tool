@@ -7,12 +7,15 @@ export interface ColorScheme {
 }
 
 export const predefinedColorSchemes: ColorScheme[] = [
+  { name: "Desert Bloom", color1: "#24330D", color2: "#335402" },
   { name: "Forest Mist", color1: "#4B7D01", color2: "#335402" }, // Default Green / Light Blue
   { name: "Earthy Bark", color1: "#D4D418", color2: "#BDBC1D" }, // Dark Brown / Yellow-Green
-  { name: "Sunset Grove", color1: "#C66420", color2: "#4E2F1D" }, // Dark Green / Orange
-  { name: "Desert Bloom", color1: "#FF9D58", color2: "#ECC996" }, // Dark Brown / Cream
-  { name: "Spring Leaf", color1: "#EACC7E", color2: "#F4F0E6" },
-  { name: "Spring Lesf", color1: "#FF9E3E", color2: "#FF8433" }, // Green / Light Yellow-Green
+  { name: "Sunset Grove", color1: "#C66420", color2: "#4E2F1D" },
+  { name: "Spring Lesf", color1: "#FF9E3E", color2: "#FF8433" }, // Dark Green / Orange
+  // Dark Brown / Cream
+  { name: "Spring Leaf", color1: "#ECC996", color2: "#FFDEB2" },
+  { name: "Spring Laf", color1: "#EACC7E", color2: "#F4F0E6" },
+  // Green / Light Yellow-Green
   // Add more schemes as needed
 ];
 
@@ -30,147 +33,150 @@ export interface TreeType {
 
 export const treeTypes: TreeType[] = [
   {
-    name: "Oak",
-    id: "english_oak",
+    name: "Tree Bark",
+    id: "Tree Bark",
     images: [
       {
-        id: "eng1",
-        url: "/assets/english_bark_1.png",
-        altText: "English Oak Bark Texture 1",
+        id: "TB1",
+        url: "/assets/Tree_Bark_1.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "eng2",
-        url: "/assets/english_bark_2.png",
-        altText: "English Oak Bark Texture 2",
+        id: "TB2",
+        url: "/assets/Tree_Bark_2.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "eng3",
-        url: "/assets/english_bark_3.png",
-        altText: "English Oak Bark Texture 3",
+        id: "TB3",
+        url: "/assets/Tree_Bark_3.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "eng4",
-        url: "/assets/english_bark_4.png",
-        altText: "English Oak Bark Texture 4",
+        id: "TB4",
+        url: "/assets/Tree_Bark_4.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "eng5",
-        url: "/assets/english_bark_5.png",
-        altText: "English Oak Bark Texture 5",
-      },
-      // Add more English Oak images if you have them
-    ],
-  },
-  {
-    name: "Baobab",
-    id: "baobab",
-    images: [
-      {
-        id: "bao1",
-        url: "/assets/baobab_bark_1.png",
-        altText: "Baobab Bark Texture 1",
+        id: "TB5",
+        url: "/assets/Tree_Bark_5.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "bao2",
-        url: "/assets/baobab_bark_2.png",
-        altText: "Baobab Bark Texture 2",
-      },
-      // Add more Baobab images if you have them
-    ],
-  },
-  {
-    name: "Shea",
-    id: "shea",
-    images: [
-      {
-        id: "shea1",
-        url: "/assets/shea_1.png",
-        altText: "Shea Bark Texture 1",
+        id: "TB6",
+        url: "/assets/Tree_Bark_6.webp",
+        altText: "Tree Bark",
       },
       {
-        id: "shea2",
-        url: "/assets/shea_2.png",
-        altText: "Shea Bark Texture 2",
+        id: "TB7",
+        url: "/assets/Tree_Bark_7.webp",
+        altText: "Tree Bark",
+      },
+      {
+        id: "TB8",
+        url: "/assets/Tree_Bark_8.webp",
+        altText: "Tree Bark",
+      },
+      {
+        id: "TB9",
+        url: "/assets/Tree_Bark_9.webp",
+        altText: "Tree Bark",
+      },
+      {
+        id: "TB10",
+        url: "/assets/Tree_Bark_10.webp",
+        altText: "Tree Bark",
       },
     ],
   },
   {
-    name: "Moringa",
-    id: "moringa",
+    name: "Produce & Foliage",
+    id: "Produce & Foliage",
     images: [
       {
-        id: "moringa1",
-        url: "/assets/moringa_1.png",
-        altText: "Moringa Bark Texture 1",
+        id: "pandf1",
+        url: "/assets/fandp_1.webp",
+        altText: "Produce & Foliage",
       },
       {
-        id: "moringa2",
-        url: "/assets/moringa_2.png",
-        altText: "Moringa Bark Texture 2",
+        id: "pandf2",
+        url: "/assets/fandp_2.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf3",
+        url: "/assets/fandp_3.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf4",
+        url: "/assets/fandp_4.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf5",
+        url: "/assets/fandp_5.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf6",
+        url: "/assets/fandp_6.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf7",
+        url: "/assets/fandp_7.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf8",
+        url: "/assets/fandp_8.webp",
+        altText: "Produce & Foliage",
       },
     ],
   },
   {
-    name: "Mango",
-    id: "mango",
+    name: "Landscapes",
+    id: "Landscapes",
     images: [
       {
-        id: "mango1",
-        url: "/assets/mango_bark_1.png",
-        altText: "Mango Bark Texture 1",
+        id: "ls1",
+        url: "/assets/ls_1.webp",
+        altText: "Landscape",
       },
       {
-        id: "mango2",
-        url: "/assets/mango_bark_2.png",
-        altText: "Mango Bark Texture 2",
-      },
-    ],
-  },
-  {
-    name: "Cashew",
-    id: "cashew",
-    images: [
-      {
-        id: "cashew1",
-        url: "/assets/cashew_bark_1.png",
-        altText: "Cashew Bark Texture 1",
+        id: "ls2",
+        url: "/assets/ls_2.webp",
+        altText: "Landscape",
       },
       {
-        id: "cashew2",
-        url: "/assets/cashew_bark_2.png",
-        altText: "Cashew Bark Texture 2",
-      },
-    ],
-  },
-  {
-    name: "Acacia",
-    id: "acacia",
-    images: [
-      {
-        id: "acacia1",
-        url: "/assets/acacia_bark_1.png",
-        altText: "Acacia Bark Texture 1",
+        id: "ls3",
+        url: "/assets/ls_3.webp",
+        altText: "Landscape",
       },
       {
-        id: "acacia2",
-        url: "/assets/acacia_bark_2.png",
-        altText: "Acacia Bark Texture 2",
-      },
-    ],
-  },
-  {
-    name: "Foliage",
-    id: "foliage",
-    images: [
-      {
-        id: "foliage1",
-        url: "/assets/foliage_1.png",
-        altText: "Foliage Texture 1",
+        id: "ls4",
+        url: "/assets/ls_4.webp",
+        altText: "Landscape",
       },
       {
-        id: "foliage2",
-        url: "/assets/foliage_2.png",
-        altText: "Foliage Texture 2",
+        id: "ls5",
+        url: "/assets/ls_5.webp",
+        altText: "Landscape",
+      },
+      {
+        id: "ls6",
+        url: "/assets/ls_6.webp",
+        altText: "Landscape",
+      },
+      {
+        id: "ls7",
+        url: "/assets/ls_7.webp",
+        altText: "Landscape",
+      },
+      {
+        id: "ls8",
+        url: "/assets/ls_8.webp",
+        altText: "Landscape",
       },
     ],
   },

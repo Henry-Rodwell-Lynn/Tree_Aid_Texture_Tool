@@ -64,7 +64,7 @@
       }
 
       void main() {
-          vec2 uv = v_texCoord;
+          vec2 uv = vec2(v_texCoord.x, 1.0 - v_texCoord.y);
 
           float canvasAspect = u_resolution.x / u_resolution.y;
           float imageAspect = 1.0;

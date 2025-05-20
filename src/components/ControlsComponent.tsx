@@ -4,15 +4,15 @@ import { predefinedColorSchemes, type ColorScheme } from "../data";
 import { pulsePresets } from "../data/pulsePresets";
 
 export function ControlsComponent() {
-  const {
-    thresholdValue,
-    setThresholdValue,
-    activeColorSchemeName,
-    setActiveColorScheme,
-    availableTreeTypes,
-    selectedTreeTypeId,
-    selectTreeType, // New from store
-  } = useEffectStore();
+  const thresholdValue = useEffectStore(state => state.thresholdValue);
+  const setThresholdValue = useEffectStore(state => state.setThresholdValue);
+  const activeColorSchemeName = useEffectStore(state => state.activeColorSchemeName);
+  const setActiveColorScheme = useEffectStore(state => state.setActiveColorScheme);
+  const availableTreeTypes = useEffectStore(state => state.availableTreeTypes);
+  const selectedTreeTypeId = useEffectStore(state => state.selectedTreeTypeId);
+  const selectTreeType = useEffectStore(state => state.selectTreeType);
+  // Use selector so component re-renders when isRecording changes
+  const isRecording = useEffectStore(s => s.isRecording);
 
   const handleSchemeSelect = (scheme: ColorScheme) => {
     setActiveColorScheme(scheme);
@@ -22,14 +22,14 @@ export function ControlsComponent() {
     selectTreeType(treeId);
   };
 
-  const isRecording = useEffectStore((s) => s.isRecording);
 
   return (
     <div className="divide-y divide-[#24330D] bg-opacity-50 text-[#24330D] w-full max-w-none border-r-1 border-t-2 border-l-2 border-b-1">
-      <div>
+      <div className="flex">
         <h1 className="text-3xl font-bold mb-3 mt-3 ml-3 text-[#24330D]">
           Texture Generator
         </h1>
+        
       </div>
       {/* Canvas Size Controls */}
       <div className="border-t-1 border-[#24330D] p-4 shadow-sm">
@@ -95,17 +95,17 @@ export function ControlsComponent() {
         <label className="block text-sm font-medium mb-2 text-left uppercase">
           Colour Scheme:
         </label>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {predefinedColorSchemes.map((scheme) => (
             <button
               key={scheme.name}
               title={scheme.name}
               onClick={() => handleSchemeSelect(scheme)}
-              className={`aspect-square w-12 focus:outline-none transition-all duration-150 ease-in-out
+              className={`aspect-square w-full focus:outline-none transition-all duration-150 ease-in-out
                           ${
                             activeColorSchemeName === scheme.name
                               ? "ring-2 ring-offset-2 ring-[#335402] ring-offset-[#cdc9bf]"
-                              : "ring-1 ring-gray-400 hover:ring-gray-500"
+                              : "ring-1 ring-gray-400 " + (activeColorSchemeName !== scheme.name ? "hover:ring-gray-500 hover:bg-[#D2F49E] hover:text-[#24330D]" : "") + " transition-colors duration-150 ease-in-out"
                           }
                           flex items-center justify-center overflow-hidden shadow-md hover:shadow-lg`}
               aria-pressed={activeColorSchemeName === scheme.name}
@@ -128,7 +128,7 @@ export function ControlsComponent() {
       {/* Tree Type Selection Buttons */}
       <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
         <label className="block text-sm font-medium mb-2 text-left uppercase">
-          Texture Form (Bark + Foliage):
+          Texture:
         </label>
         <div className="flex flex-col gap-2">
           {availableTreeTypes.map((tree) => (
@@ -139,7 +139,7 @@ export function ControlsComponent() {
                 selectedTreeTypeId === tree.id
                   ? "bg-[#24330D] text-[#D2F49E]"
                   : "bg-transparent text-[#24330D]"
-              }`}
+              } ${selectedTreeTypeId !== tree.id ? "hover:bg-[#D2F49E] hover:text-[#24330D]" : ""}`}
               aria-pressed={selectedTreeTypeId === tree.id}
             >
               {tree.name}
@@ -159,12 +159,11 @@ export function ControlsComponent() {
               onClick={() =>
                 useEffectStore.getState().setPulseProfile(preset.name)
               }
-              className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D]
-          ${
-            useEffectStore.getState().activePulseName === preset.name
-              ? "bg-[#24330D] text-[#D2F49E]"
-              : "bg-transparent text-[#24330D]"
-          }`}
+              className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] ${
+                useEffectStore.getState().activePulseName === preset.name
+                  ? "bg-[#24330D] text-[#D2F49E]"
+                  : "bg-transparent text-[#24330D]"
+              } ${useEffectStore.getState().activePulseName !== preset.name ? "hover:bg-[#D2F49E] hover:text-[#24330D]" : ""}`}
             >
               {preset.name}
             </button>
@@ -182,7 +181,7 @@ export function ControlsComponent() {
               console.log("Export Image button clicked");
               useEffectStore.getState().triggerImageExport?.();
             }}
-            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D]"
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] hover:bg-[#D2F49E] hover:text-[#24330D]"
           >
             Export Image
           </button>
@@ -193,11 +192,16 @@ export function ControlsComponent() {
               );
               useEffectStore.getState().toggleRecording?.();
             }}
-            className={`px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] ${
+            className={`px-5 py-3 text-base font-bold border-2 border-[#24330D] transition-colors duration-150 ease-in-out ${
               isRecording
-                ? "bg-red-600 text-white animate-pulse hover:bg-red-600"
-                : " text-[#24330D] hover:bg-red-600 hover:text-white"
+                ? "animate-pulse"
+                : ""
             }`}
+            style={{
+              backgroundColor: isRecording ? "red" : "transparent",
+              color: isRecording ? "white" : "#24330D",
+              cursor: "pointer"
+            }}
           >
             {isRecording ? "Recording..." : "Toggle Video Recording"}
           </button>
