@@ -122,16 +122,6 @@ export const treeTypes: TreeType[] = [
         url: "/assets/fandp_6.webp",
         altText: "Produce & Foliage",
       },
-      {
-        id: "pandf7",
-        url: "/assets/fandp_7.webp",
-        altText: "Produce & Foliage",
-      },
-      {
-        id: "pandf8",
-        url: "/assets/fandp_8.webp",
-        altText: "Produce & Foliage",
-      },
     ],
   },
   {

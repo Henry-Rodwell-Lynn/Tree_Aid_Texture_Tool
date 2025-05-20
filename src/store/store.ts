@@ -67,7 +67,7 @@ interface EffectState {
 export const useEffectStore = create<EffectState>((set, get) => ({
   // Existing state
   blurRadius: 1.0,
-  thresholdValue: 0.85,
+  thresholdValue: 0.50,
   setThresholdValue: (value) =>
     set({ thresholdValue: Math.max(0, Math.min(1, value)) }),
   duotoneColor1: predefinedColorSchemes[0].color1,

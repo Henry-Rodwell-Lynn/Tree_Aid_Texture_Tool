@@ -28,7 +28,7 @@ function App() {
           </div>
         </div>
       </main>
-      <img className="w-6 absolute bottom-0 m-4" src="/assets/Tree-Aid-Logo.svg" />
+      {/* <img className="w-6 absolute bottom-0 m-4" src="/assets/Tree-Aid-Logo.svg" /> */}
     </div>
   );
 }
