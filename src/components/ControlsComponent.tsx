@@ -89,6 +89,27 @@ export function ControlsComponent() {
         />
       </div>
 
+      {/* Fade In and Fade Out Buttons */}
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Loop Fade Tools:
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => animateThreshold(thresholdValue, 0.5, 2000)}
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] hover:bg-[#D2F49E] hover:text-[#24330D]"
+          >
+            Fade In
+          </button>
+          <button
+            onClick={() => animateThreshold(thresholdValue, 0.0, 2000)}
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] hover:bg-[#D2F49E] hover:text-[#24330D]"
+          >
+            Fade Out
+          </button>
+        </div>
+      </div>
+
 
       {/* Color Scheme Buttons (existing) */}
       <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
@@ -220,4 +241,19 @@ export function ControlsComponent() {
       </button> */}
     </div>
   );
+}
+
+function animateThreshold(from: number, to: number, duration: number) {
+  const startTime = performance.now();
+  const step = (now: number) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = progress * progress * (3 - 2 * progress);
+    const value = from + (to - from) * eased;
+    useEffectStore.getState().setThresholdValue(value);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+  requestAnimationFrame(step);
 }
