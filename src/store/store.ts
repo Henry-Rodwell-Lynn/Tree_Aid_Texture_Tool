@@ -62,6 +62,9 @@ interface EffectState {
 
   scale: number;
   setScale: (scale: number) => void;
+
+  treeTypeJustChanged: boolean;
+  markTreeChangeComplete: () => void;
 }
 
 export const useEffectStore = create<EffectState>((set, get) => ({
@@ -108,6 +111,7 @@ export const useEffectStore = create<EffectState>((set, get) => ({
         selectedTreeTypeId: treeId,
         currentImageA_url: imageA,
         currentImageB_url: imageB,
+        treeTypeJustChanged: true,
       });
 
       get().shuffleImages(treeId); // Shuffle order and update indices
@@ -117,6 +121,7 @@ export const useEffectStore = create<EffectState>((set, get) => ({
         selectedTreeTypeId: treeId,
         currentImageA_url: null,
         currentImageB_url: null,
+        treeTypeJustChanged: true,
       });
     }
   },
@@ -206,4 +211,7 @@ export const useEffectStore = create<EffectState>((set, get) => ({
 
   scale: 1.0,
   setScale: (scale) => set({ scale }),
+
+  treeTypeJustChanged: false,
+  markTreeChangeComplete: () => set({ treeTypeJustChanged: false }),
 }));

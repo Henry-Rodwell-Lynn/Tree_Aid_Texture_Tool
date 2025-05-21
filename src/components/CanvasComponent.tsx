@@ -192,11 +192,22 @@ export function CanvasComponent() {
     const selectedTree = availableTreeTypes.find(tree => tree.id === selectedTreeTypeId);
     if (selectedTree) {
       textureQueueRef.current = selectedTree.images.map(img => img.url);
-      imageIndices.current = [0, 1];
+      // Randomize two unique indices for initial textures
+      const totalImages = selectedTree.images.length;
+      if (totalImages >= 2) {
+        const indices = [...Array(totalImages).keys()];
+        for (let i = indices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        imageIndices.current = [indices[0], indices[1]];
+      } else {
+        imageIndices.current = [0, 0];
+      }
       lastTreeIdRef.current = selectedTree.id;
 
       for (let i = 0; i < 2; i++) {
-        const img = selectedTree.images[i];
+        const img = selectedTree.images[imageIndices.current[i]];
         const texture = gl.createTexture();
         gl.activeTexture(gl.TEXTURE0 + i);
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -242,6 +253,51 @@ export function CanvasComponent() {
     const state = useEffectStore.getState();
     const FADE_DURATION = state.pulseDurations[state.pulseIndex % state.pulseDurations.length];
     const elapsed = now - fadeStartTimeRef.current;
+    // --- Insert treeTypeJustChanged logic here ---
+    if (state.treeTypeJustChanged) {
+      // Preemptively reset and load new textures for immediate fade-in
+      fadeStartTimeRef.current = now;
+      // Randomize two unique indices for textures after tree type change
+      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+      if (selectedTree) {
+        textureQueueRef.current = selectedTree.images.map(img => img.url);
+        const totalImages = selectedTree.images.length;
+        if (totalImages >= 2) {
+          const indices = [...Array(totalImages).keys()];
+          for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+          }
+          imageIndices.current = [indices[0], indices[1]];
+        } else {
+          imageIndices.current = [0, 0];
+        }
+        fadingA.current = true;
+        for (let i = 0; i < 2; i++) {
+          const img = selectedTree.images[imageIndices.current[i]];
+          const texture = gl.createTexture();
+          gl.activeTexture(gl.TEXTURE0 + i);
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          textureRefs.current[i] = texture;
+          const image = new Image();
+          image.crossOrigin = 'anonymous';
+          image.onload = () => {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            const loc = gl.getUniformLocation(program, `u_image${i + 1}`);
+            gl.uniform1i(loc, i);
+            // Optionally log: console.log(`[Debug] Tree change: texture ${i} bound to TEXTURE${i} → u_image${i + 1}`);
+          };
+          image.src = img.url;
+        }
+        lastTreeIdRef.current = selectedTree.id;
+      }
+      useEffectStore.getState().markTreeChangeComplete();
+    }
     const fade = Math.min(elapsed / FADE_DURATION, 1);
     const easedFade = fade * fade * (3 - 2 * fade);
     const stableOpacities = fadingA.current
