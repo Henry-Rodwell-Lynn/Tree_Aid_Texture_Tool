@@ -13,6 +13,10 @@ export function ControlsComponent() {
   const selectTreeType = useEffectStore(state => state.selectTreeType);
   // Use selector so component re-renders when isRecording changes
   const isRecording = useEffectStore(s => s.isRecording);
+  const isPaused = useEffectStore(state => state.isPaused);
+  const setIsPaused = useEffectStore(state => state.setIsPaused);
+  const goToNextImage = useEffectStore(state => state.goToNextImage);
+  const goToPreviousImage = useEffectStore(state => state.goToPreviousImage);
 
   const handleSchemeSelect = (scheme: ColorScheme) => {
     setActiveColorScheme(scheme);
@@ -191,6 +195,38 @@ export function ControlsComponent() {
           ))}
         </div>
       </div>
+
+      {/* Playback Controls */}
+      <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
+        <label className="block text-sm font-medium mb-2 text-left uppercase">
+          Playback:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => goToPreviousImage?.()}
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] hover:bg-[#D2F49E] hover:text-[#24330D]"
+          >
+            ◀ Prev
+          </button>
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className={`px-5 py-3 text-base font-bold border-2 border-[#24330D] transition-colors duration-150 ease-in-out ${
+              isPaused
+                ? "bg-[#D2F49E] text-[#24330D]"
+                : "bg-transparent text-[#24330D]"
+            } hover:bg-[#D2F49E] hover:text-[#24330D]`}
+          >
+            {isPaused ? "Play" : "Pause"}
+          </button>
+          <button
+            onClick={() => goToNextImage?.()}
+            className="px-5 py-3 text-base font-bold focus:outline-none transition-colors duration-150 ease-in-out border-2 border-[#24330D] hover:bg-[#D2F49E] hover:text-[#24330D]"
+          >
+            Next ▶
+          </button>
+        </div>
+      </div>
+
       {/* Export Buttons */}
       <div className="border-t border-b border-[#24330D] p-4 shadow-sm">
         <label className="block text-sm font-medium mb-2 text-left uppercase">

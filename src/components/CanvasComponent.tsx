@@ -244,6 +244,10 @@ export function CanvasComponent() {
   // To prevent double loads, track if we are loading
   const imageLoadPendingRef = useRef(false);
 
+  // Refs to track previous manualAdvance and manualRewind values
+  const prevAdvanceRef = useRef(0);
+  const prevRewindRef = useRef(0);
+
   const render = () => {
     const gl = glRef.current;
     const program = programRef.current;
@@ -251,8 +255,28 @@ export function CanvasComponent() {
 
     const now = performance.now();
     const state = useEffectStore.getState();
+    const { pauseTimestamp, setPauseTimestamp } = useEffectStore.getState();
+    // Early return if paused: continue rendering, but skip fade/transition logic
+    if (state.isPaused) {
+      if (pauseTimestamp === null) {
+        const now = performance.now();
+        setPauseTimestamp(now);
+        console.log("[Pause] Animation paused at", now);
+      }
+      requestAnimationFrame(render);
+      return;
+    }
+
+    // Adjust fadeStartTimeRef after pause with time compensation logic
+    if (pauseTimestamp !== null) {
+      const pauseDelta = now - pauseTimestamp;
+      fadeStartTimeRef.current += pauseDelta;
+      setPauseTimestamp(null);
+      console.log("[Resume] Adjusted fadeStartTimeRef by", pauseDelta, "ms after pause");
+    }
     const FADE_DURATION = state.pulseDurations[state.pulseIndex % state.pulseDurations.length];
     const elapsed = now - fadeStartTimeRef.current;
+
     // --- Insert treeTypeJustChanged logic here ---
     if (state.treeTypeJustChanged) {
       // Preemptively reset and load new textures for immediate fade-in
@@ -298,6 +322,45 @@ export function CanvasComponent() {
       }
       useEffectStore.getState().markTreeChangeComplete();
     }
+
+    // Detect manual advances or rewinds
+    const { manualAdvance, manualRewind } = useEffectStore.getState();
+    if (
+      manualAdvance !== prevAdvanceRef.current ||
+      manualRewind !== prevRewindRef.current
+    ) {
+      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+      if (selectedTree) {
+        const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
+        const availableIndices = selectedTree.images
+          .map((_, idx) => idx)
+          .filter(idx => idx !== previousIdx);
+        const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
+
+        preloadImage(selectedTree.images[nextIdx].url).then((image) => {
+          const texture = gl.createTexture();
+          const nextSlot = fadingA.current ? 0 : 1;
+          gl.activeTexture(gl.TEXTURE0 + nextSlot);
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
+          gl.uniform1i(loc, nextSlot);
+          textureRefs.current[nextSlot] = texture;
+          fadingA.current = !fadingA.current;
+          fadeStartTimeRef.current = performance.now();
+          prevAdvanceRef.current = manualAdvance;
+          prevRewindRef.current = manualRewind;
+          requestAnimationFrame(render);
+        });
+        return;
+      }
+    }
+
     const fade = Math.min(elapsed / FADE_DURATION, 1);
     const easedFade = fade * fade * (3 - 2 * fade);
     const stableOpacities = fadingA.current
@@ -306,7 +369,6 @@ export function CanvasComponent() {
 
     // Debug log for opacity values during the transition
     // console.log(`[Render] Fade=${fade.toFixed(3)} easedFade=${easedFade.toFixed(3)} opacities=[${stableOpacities[0].toFixed(3)}, ${stableOpacities[1].toFixed(3)}] fadingA=${fadingA.current}`);
-
 
     // If an image load is pending, skip drawing until it finishes
     if (imageLoadPendingRef.current) {
@@ -330,9 +392,9 @@ export function CanvasComponent() {
         const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
         imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
 
-        console.log(`[Debug] Previous Index: ${previousIdx}`);
-        console.log(`[Debug] Selected Next Index: ${nextIdx}`);
-        console.log(`[Debug] Updated imageIndices: [${imageIndices.current[0]}, ${imageIndices.current[1]}]`);
+        // console.log(`[Debug] Previous Index: ${previousIdx}`);
+        // console.log(`[Debug] Selected Next Index: ${nextIdx}`);
+        // console.log(`[Debug] Updated imageIndices: [${imageIndices.current[0]}, ${imageIndices.current[1]}]`);
 
         const img = selectedTree.images[nextIdx];
         imageLoadPendingRef.current = true;
@@ -350,16 +412,16 @@ export function CanvasComponent() {
           gl.uniform1i(loc, nextSlot);
           textureRefs.current[nextSlot] = texture;
           textureRefs.current[nextSlot] = texture;
-          console.log(`[Debug] Texture ${nextIdx} bound to TEXTURE${nextSlot} → u_image${nextSlot + 1}`);
+          // console.log(`[Debug] Texture ${nextIdx} bound to TEXTURE${nextSlot} → u_image${nextSlot + 1}`);
 
-          console.log(`[Debug] Fade complete. Updated imageIndices: ${imageIndices.current.join(', ')} | nextSlot: ${nextSlot}`);
+          // console.log(`[Debug] Fade complete. Updated imageIndices: ${imageIndices.current.join(', ')} | nextSlot: ${nextSlot}`);
 
-          console.log(`[Textures] Loaded texture for slot ${nextSlot}: index ${nextIdx}`);
-          console.log(`[State] imageIndices: ${imageIndices.current[0]}, ${imageIndices.current[1]}`);
-          console.log(`[Fade] Image ${previousIdx} fading to ${nextIdx}. Next animation will be ${nextIdx} to ...`);
+          // console.log(`[Textures] Loaded texture for slot ${nextSlot}: index ${nextIdx}`);
+          // console.log(`[State] imageIndices: ${imageIndices.current[0]}, ${imageIndices.current[1]}`);
+          // console.log(`[Fade] Image ${previousIdx} fading to ${nextIdx}. Next animation will be ${nextIdx} to ...`);
 
           fadeStartTimeRef.current = performance.now();
-          console.log(`[Debug] New fade start time set`);
+          // console.log(`[Debug] New fade start time set`);
           setNextTextureIndex(nextIdx);
           completeFade();
           imageLoadPendingRef.current = false;

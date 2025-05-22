@@ -65,6 +65,18 @@ interface EffectState {
 
   treeTypeJustChanged: boolean;
   markTreeChangeComplete: () => void;
+
+  // Pause state
+  isPaused: boolean;
+  setIsPaused: (paused: boolean) => void;
+  goToNextImage: () => void;
+  goToPreviousImage: () => void;
+
+  manualAdvance: number;
+  manualRewind: number;
+
+  pauseTimestamp: number | null;
+  setPauseTimestamp: (ts: number | null) => void;
 }
 
 export const useEffectStore = create<EffectState>((set, get) => ({
@@ -214,4 +226,20 @@ export const useEffectStore = create<EffectState>((set, get) => ({
 
   treeTypeJustChanged: false,
   markTreeChangeComplete: () => set({ treeTypeJustChanged: false }),
+
+  isPaused: false,
+  setIsPaused: (paused) => set({ isPaused: paused }),
+
+  manualAdvance: 0,
+  manualRewind: 0,
+
+  goToNextImage: () => {
+    set((state) => ({ manualAdvance: state.manualAdvance + 1 }));
+  },
+  goToPreviousImage: () => {
+    set((state) => ({ manualRewind: state.manualRewind + 1 }));
+  },
+
+  pauseTimestamp: null,
+  setPauseTimestamp: (ts) => set({ pauseTimestamp: ts }),
 }));
