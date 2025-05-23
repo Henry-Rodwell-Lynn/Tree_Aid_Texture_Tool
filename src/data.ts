@@ -7,16 +7,16 @@ export interface ColorScheme {
 }
 
 export const predefinedColorSchemes: ColorScheme[] = [
-  { name: "Desert Bloom", color1: "#24330D", color2: "#335402" },
-  { name: "Forest Mist", color1: "#4B7D01", color2: "#335402" }, // Default Green / Light Blue
-  { name: "Earthy Bark", color1: "#D4D418", color2: "#BDBC1D" }, // Dark Brown / Yellow-Green
-  { name: "Sunset Grove", color1: "#C66420", color2: "#4E2F1D" },
-  { name: "Spring Lesf", color1: "#FF9E3E", color2: "#FF8433" }, // Dark Green / Orange
-  // Dark Brown / Cream
-  { name: "Spring Leaf", color1: "#ECC996", color2: "#FFDEB2" },
-  { name: "Spring Laf", color1: "#EACC7E", color2: "#F4F0E6" },
-  // Green / Light Yellow-Green
-  // Add more schemes as needed
+  { name: "TA Dark Green - TA Green", color1: "#24330D", color2: "#335402" },
+  { name: "TA Green - 4B7D01", color1: "#335402", color2: "#4B7D01" }, 
+  { name: "Baobab Green - D4D418", color1: "#BDBC1D", color2: "#D4D418" }, 
+  { name: "Tree Bark Brown - 8A4A1F", color1: "#4E2F1D", color2: "#8A4A1F" },
+  { name: "Shea Nut Beige - F5B377", color1: "#ECC996", color2: "#F5B377" }, 
+  { name: "Boulie Beige - EFDEB2", color1: "#F4F0E6", color2: "#EFDEB2" },
+  { name: "Cashew Orange - FF9E3E", color1: "#FF8433", color2: "#FF9E3E" },
+  { name: "Cashew Yellow - DEDA45", color1: "#FFF86D", color2: "#DEDA45" },
+  { name: "Seedling Green - EAFFCA", color1: "#D2F49E", color2: "#EAFFCA" },
+  { name: "Blue Sky - DAF0FF", color1: "#C7E3F6", color2: "#DAF0FF" },
 ];
 
 export interface TreeImage {
@@ -120,6 +120,16 @@ export const treeTypes: TreeType[] = [
       {
         id: "pandf6",
         url: "/assets/fandp_6.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf7",
+        url: "/assets/fandp_7.webp",
+        altText: "Produce & Foliage",
+      },
+      {
+        id: "pandf8",
+        url: "/assets/fandp_8.webp",
         altText: "Produce & Foliage",
       },
     ],

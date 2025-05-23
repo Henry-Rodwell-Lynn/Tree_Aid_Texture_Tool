@@ -256,184 +256,169 @@ export function CanvasComponent() {
     const now = performance.now();
     const state = useEffectStore.getState();
     const { pauseTimestamp, setPauseTimestamp } = useEffectStore.getState();
-    // Early return if paused: continue rendering, but skip fade/transition logic
+    // Always update duotone color uniforms, even when paused
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_duotoneColor1'), hexToRgbArray(state.duotoneColor1));
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_duotoneColor2'), hexToRgbArray(state.duotoneColor2));
+    // Pause logic: elapsed freezes while paused, and fadeStartTimeRef is only adjusted once on resume
+    let elapsed: number;
     if (state.isPaused) {
       if (pauseTimestamp === null) {
-        const now = performance.now();
         setPauseTimestamp(now);
-        console.log("[Pause] Animation paused at", now);
       }
-      requestAnimationFrame(render);
-      return;
-    }
-
-    // Adjust fadeStartTimeRef after pause with time compensation logic
-    if (pauseTimestamp !== null) {
-      const pauseDelta = now - pauseTimestamp;
-      fadeStartTimeRef.current += pauseDelta;
-      setPauseTimestamp(null);
-      console.log("[Resume] Adjusted fadeStartTimeRef by", pauseDelta, "ms after pause");
+      elapsed = (pauseTimestamp ?? now) - fadeStartTimeRef.current;
+    } else {
+      if (pauseTimestamp !== null) {
+        const pauseDelta = now - pauseTimestamp;
+        fadeStartTimeRef.current += pauseDelta;
+        setPauseTimestamp(null);
+      }
+      elapsed = now - fadeStartTimeRef.current;
     }
     const FADE_DURATION = state.pulseDurations[state.pulseIndex % state.pulseDurations.length];
-    const elapsed = now - fadeStartTimeRef.current;
 
-    // --- Insert treeTypeJustChanged logic here ---
-    if (state.treeTypeJustChanged) {
-      // Preemptively reset and load new textures for immediate fade-in
-      fadeStartTimeRef.current = now;
-      // Randomize two unique indices for textures after tree type change
-      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
-      if (selectedTree) {
-        textureQueueRef.current = selectedTree.images.map(img => img.url);
-        const totalImages = selectedTree.images.length;
-        if (totalImages >= 2) {
-          const indices = [...Array(totalImages).keys()];
-          for (let i = indices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [indices[i], indices[j]] = [indices[j], indices[i]];
-          }
-          imageIndices.current = [indices[0], indices[1]];
-        } else {
-          imageIndices.current = [0, 0];
-        }
-        fadingA.current = true;
-        for (let i = 0; i < 2; i++) {
-          const img = selectedTree.images[imageIndices.current[i]];
-          const texture = gl.createTexture();
-          gl.activeTexture(gl.TEXTURE0 + i);
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          textureRefs.current[i] = texture;
-          const image = new Image();
-          image.crossOrigin = 'anonymous';
-          image.onload = () => {
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            const loc = gl.getUniformLocation(program, `u_image${i + 1}`);
-            gl.uniform1i(loc, i);
-            // Optionally log: console.log(`[Debug] Tree change: texture ${i} bound to TEXTURE${i} → u_image${i + 1}`);
-          };
-          image.src = img.url;
-        }
-        lastTreeIdRef.current = selectedTree.id;
-      }
-      useEffectStore.getState().markTreeChangeComplete();
-    }
-
-    // Detect manual advances or rewinds
-    const { manualAdvance, manualRewind } = useEffectStore.getState();
-    if (
-      manualAdvance !== prevAdvanceRef.current ||
-      manualRewind !== prevRewindRef.current
-    ) {
-      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
-      if (selectedTree) {
-        const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
-        const availableIndices = selectedTree.images
-          .map((_, idx) => idx)
-          .filter(idx => idx !== previousIdx);
-        const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-        imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
-
-        preloadImage(selectedTree.images[nextIdx].url).then((image) => {
-          const texture = gl.createTexture();
-          const nextSlot = fadingA.current ? 0 : 1;
-          gl.activeTexture(gl.TEXTURE0 + nextSlot);
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-          const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
-          gl.uniform1i(loc, nextSlot);
-          textureRefs.current[nextSlot] = texture;
-          fadingA.current = !fadingA.current;
-          fadeStartTimeRef.current = performance.now();
-          prevAdvanceRef.current = manualAdvance;
-          prevRewindRef.current = manualRewind;
-          requestAnimationFrame(render);
-        });
-        return;
-      }
-    }
-
+    // Always compute fade progress, even when paused, so pausing preserves fade state
     const fade = Math.min(elapsed / FADE_DURATION, 1);
     const easedFade = fade * fade * (3 - 2 * fade);
     const stableOpacities = fadingA.current
       ? [1 - easedFade, easedFade]
       : [easedFade, 1 - easedFade];
 
-    // Debug log for opacity values during the transition
-    // console.log(`[Render] Fade=${fade.toFixed(3)} easedFade=${easedFade.toFixed(3)} opacities=[${stableOpacities[0].toFixed(3)}, ${stableOpacities[1].toFixed(3)}] fadingA=${fadingA.current}`);
-
-    // If an image load is pending, skip drawing until it finishes
-    if (imageLoadPendingRef.current) {
-      requestAnimationFrame(render);
-      return;
-    }
-
-    if (elapsed >= FADE_DURATION) {
-      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
-      if (selectedTree) {
-        if (lastTreeIdRef.current !== selectedTree.id) {
+    // Only run fade logic and texture switching if not paused
+    if (!state.isPaused) {
+      // --- Insert treeTypeJustChanged logic here ---
+      if (state.treeTypeJustChanged) {
+        // Preemptively reset and load new textures for immediate fade-in
+        fadeStartTimeRef.current = now;
+        // Randomize two unique indices for textures after tree type change
+        const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+        if (selectedTree) {
           textureQueueRef.current = selectedTree.images.map(img => img.url);
-          imageIndices.current = [0, 1];
+          const totalImages = selectedTree.images.length;
+          if (totalImages >= 2) {
+            const indices = [...Array(totalImages).keys()];
+            for (let i = indices.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            imageIndices.current = [indices[0], indices[1]];
+          } else {
+            imageIndices.current = [0, 0];
+          }
+          fadingA.current = true;
+          for (let i = 0; i < 2; i++) {
+            const img = selectedTree.images[imageIndices.current[i]];
+            const texture = gl.createTexture();
+            gl.activeTexture(gl.TEXTURE0 + i);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            textureRefs.current[i] = texture;
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+            image.onload = () => {
+              gl.bindTexture(gl.TEXTURE_2D, texture);
+              gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+              const loc = gl.getUniformLocation(program, `u_image${i + 1}`);
+              gl.uniform1i(loc, i);
+              // Optionally log: console.log(`[Debug] Tree change: texture ${i} bound to TEXTURE${i} → u_image${i + 1}`);
+            };
+            image.src = img.url;
+          }
           lastTreeIdRef.current = selectedTree.id;
         }
+        useEffectStore.getState().markTreeChangeComplete();
+      }
 
-        const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
-        const availableIndices = selectedTree.images
-          .map((_, idx) => idx)
-          .filter(idx => idx !== previousIdx);
-        const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-        imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
+      // Detect manual advances or rewinds
+      const { manualAdvance, manualRewind } = useEffectStore.getState();
+      if (
+        manualAdvance !== prevAdvanceRef.current ||
+        manualRewind !== prevRewindRef.current
+      ) {
+        const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+        if (selectedTree) {
+          const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
+          const availableIndices = selectedTree.images
+            .map((_, idx) => idx)
+            .filter(idx => idx !== previousIdx);
+          const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+          imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
 
-        // console.log(`[Debug] Previous Index: ${previousIdx}`);
-        // console.log(`[Debug] Selected Next Index: ${nextIdx}`);
-        // console.log(`[Debug] Updated imageIndices: [${imageIndices.current[0]}, ${imageIndices.current[1]}]`);
+          preloadImage(selectedTree.images[nextIdx].url).then((image) => {
+            const texture = gl.createTexture();
+            const nextSlot = fadingA.current ? 0 : 1;
+            gl.activeTexture(gl.TEXTURE0 + nextSlot);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
+            gl.uniform1i(loc, nextSlot);
+            textureRefs.current[nextSlot] = texture;
+            fadingA.current = !fadingA.current;
+            fadeStartTimeRef.current = performance.now();
+            prevAdvanceRef.current = manualAdvance;
+            prevRewindRef.current = manualRewind;
+            requestAnimationFrame(render);
+          });
+          return;
+        }
+      }
 
-        const img = selectedTree.images[nextIdx];
-        imageLoadPendingRef.current = true;
-        preloadImage(img.url).then((image) => {
-          const texture = gl.createTexture();
-          const nextSlot = fadingA.current ? 0 : 1;
-          gl.activeTexture(gl.TEXTURE0 + nextSlot);
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-          const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
-          gl.uniform1i(loc, nextSlot);
-          textureRefs.current[nextSlot] = texture;
-          textureRefs.current[nextSlot] = texture;
-          // console.log(`[Debug] Texture ${nextIdx} bound to TEXTURE${nextSlot} → u_image${nextSlot + 1}`);
-
-          // console.log(`[Debug] Fade complete. Updated imageIndices: ${imageIndices.current.join(', ')} | nextSlot: ${nextSlot}`);
-
-          // console.log(`[Textures] Loaded texture for slot ${nextSlot}: index ${nextIdx}`);
-          // console.log(`[State] imageIndices: ${imageIndices.current[0]}, ${imageIndices.current[1]}`);
-          // console.log(`[Fade] Image ${previousIdx} fading to ${nextIdx}. Next animation will be ${nextIdx} to ...`);
-
-          fadeStartTimeRef.current = performance.now();
-          // console.log(`[Debug] New fade start time set`);
-          setNextTextureIndex(nextIdx);
-          completeFade();
-          imageLoadPendingRef.current = false;
-          // After loading, request next frame
-          requestAnimationFrame(render);
-          fadingA.current = !fadingA.current;
-        });
-        // Skip frame draw while loading image
+      // If an image load is pending, skip drawing until it finishes
+      if (imageLoadPendingRef.current) {
+        requestAnimationFrame(render);
         return;
       }
-      // If no selectedTree, just return
-      return;
+
+      if (elapsed >= FADE_DURATION) {
+        const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+        if (selectedTree) {
+          if (lastTreeIdRef.current !== selectedTree.id) {
+            textureQueueRef.current = selectedTree.images.map(img => img.url);
+            imageIndices.current = [0, 1];
+            lastTreeIdRef.current = selectedTree.id;
+          }
+
+          const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
+          const availableIndices = selectedTree.images
+            .map((_, idx) => idx)
+            .filter(idx => idx !== previousIdx);
+          const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+          imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
+
+          const img = selectedTree.images[nextIdx];
+          imageLoadPendingRef.current = true;
+          preloadImage(img.url).then((image) => {
+            const texture = gl.createTexture();
+            const nextSlot = fadingA.current ? 0 : 1;
+            gl.activeTexture(gl.TEXTURE0 + nextSlot);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
+            gl.uniform1i(loc, nextSlot);
+            textureRefs.current[nextSlot] = texture;
+            fadeStartTimeRef.current = performance.now();
+            setNextTextureIndex(nextIdx);
+            completeFade();
+            imageLoadPendingRef.current = false;
+            requestAnimationFrame(render);
+            fadingA.current = !fadingA.current;
+          });
+          // Skip frame draw while loading image
+          return;
+        }
+        // If no selectedTree, just return
+        return;
+      }
     }
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -453,12 +438,7 @@ export function CanvasComponent() {
     for (let i = 0; i < 2; i++) {
       const loc = gl.getUniformLocation(program, `u_opacity${i + 1}`);
       gl.uniform1f(loc, stableOpacities[i]);
-      // console.log(`[Debug] Set u_opacity${i + 1} to ${stableOpacities[i].toFixed(3)}`);
     }
-
-    // Log which image is expected to be on top
-    // const topImageSlot = fadingA.current ? 1 : 0;
-    // console.log(`[Render] Drawing frame. Top image slot: ${topImageSlot}`);
 
     for (let i = 0; i < 2; i++) {
       if (textureRefs.current[i]) {

@@ -120,7 +120,7 @@ export function ControlsComponent() {
         <label className="block text-sm font-medium mb-2 text-left uppercase">
           Colour Scheme:
         </label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {predefinedColorSchemes.map((scheme) => (
             <button
               key={scheme.name}
