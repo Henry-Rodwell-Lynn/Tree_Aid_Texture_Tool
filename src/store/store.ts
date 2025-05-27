@@ -81,7 +81,7 @@ interface EffectState {
 
 export const useEffectStore = create<EffectState>((set, get) => ({
   // Existing state
-  blurRadius: 1.0,
+  blurRadius: 0.6,
   thresholdValue: 0.50,
   setThresholdValue: (value) =>
     set({ thresholdValue: Math.max(0, Math.min(1, value)) }),

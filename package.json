@@ -17,6 +17,7 @@
     "@p5-wrapper/react": "^4.4.2",
     "@pixi/react": "^8.0.1",
     "@tailwindcss/vite": "^4.1.6",
+    "motion": "^12.15.0",
     "p5": "^2.0.1",
     "pixi.js": "^8.9.2",
     "react": "^19.1.0",

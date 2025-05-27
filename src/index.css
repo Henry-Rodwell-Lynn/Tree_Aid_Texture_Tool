@@ -9,8 +9,15 @@
 
 * {
   font-family: "MyCustomFont", sans-serif;
+  font-weight: 500;
 }
 
 @theme {
     --font-sans: "MyCustomFont", sans-serif;
   }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

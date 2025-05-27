@@ -2,7 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/Tree-Aid-Logo-white.svg" />
+    <link id="favicon" rel="icon" type="image/svg+xml" />
+    <script>
+      const favicon = document.getElementById('favicon');
+      const updateFavicon = (isDark) => {
+        favicon.href = isDark
+          ? '/assets/Tree-Aid-Logo-white.svg'
+          : '/assets/Tree-Aid-Logo.svg';
+      };
+
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      updateFavicon(mediaQuery.matches);
+      mediaQuery.addEventListener('change', e => updateFavicon(e.matches));
+    </script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=shuffle" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=play_arrow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Texture Generator</title>
   </head>

@@ -80,7 +80,7 @@ export function CanvasComponent() {
 
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: 'video/webm',
-          videoBitsPerSecond: 10_000_000,
+          videoBitsPerSecond: 65_000_000,
         });
         mediaRecorderRef.current = mediaRecorder;
 
@@ -339,9 +339,8 @@ export function CanvasComponent() {
       ? [1 - easedFade, easedFade]
       : [easedFade, 1 - easedFade];
 
-    // Only run fade logic and texture switching if not paused
+    // --- Insert treeTypeJustChanged logic here ---
     if (!state.isPaused) {
-      // --- Insert treeTypeJustChanged logic here ---
       if (state.treeTypeJustChanged) {
         // Preemptively reset and load new textures for immediate fade-in
         fadeStartTimeRef.current = now;
@@ -386,45 +385,49 @@ export function CanvasComponent() {
         }
         useEffectStore.getState().markTreeChangeComplete();
       }
+    }
 
-      // Detect manual advances or rewinds
-      const { manualAdvance, manualRewind } = useEffectStore.getState();
-      if (
-        manualAdvance !== prevAdvanceRef.current ||
-        manualRewind !== prevRewindRef.current
-      ) {
-        const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
-        if (selectedTree) {
-          const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
-          const availableIndices = selectedTree.images
-            .map((_, idx) => idx)
-            .filter(idx => idx !== previousIdx);
-          const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-          imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
+    // --- Manual skip detection logic: Always runs, even when paused ---
+    const { manualAdvance, manualRewind } = useEffectStore.getState();
+    if (
+      manualAdvance !== prevAdvanceRef.current ||
+      manualRewind !== prevRewindRef.current
+    ) {
+      const selectedTree = state.availableTreeTypes.find(t => t.id === state.selectedTreeTypeId);
+      if (selectedTree) {
+        const previousIdx = imageIndices.current[fadingA.current ? 1 : 0];
+        const availableIndices = selectedTree.images
+          .map((_, idx) => idx)
+          .filter(idx => idx !== previousIdx);
+        const nextIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        imageIndices.current[fadingA.current ? 0 : 1] = nextIdx;
 
-          preloadImage(selectedTree.images[nextIdx].url).then((image) => {
-            const texture = gl.createTexture();
-            const nextSlot = fadingA.current ? 0 : 1;
-            gl.activeTexture(gl.TEXTURE0 + nextSlot);
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
-            gl.uniform1i(loc, nextSlot);
-            textureRefs.current[nextSlot] = texture;
-            fadingA.current = !fadingA.current;
-            fadeStartTimeRef.current = performance.now();
-            prevAdvanceRef.current = manualAdvance;
-            prevRewindRef.current = manualRewind;
-            requestAnimationFrame(render);
-          });
-          return;
-        }
+        preloadImage(selectedTree.images[nextIdx].url).then((image) => {
+          const texture = gl.createTexture();
+          const nextSlot = fadingA.current ? 0 : 1;
+          gl.activeTexture(gl.TEXTURE0 + nextSlot);
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          const loc = gl.getUniformLocation(program, `u_image${nextSlot + 1}`);
+          gl.uniform1i(loc, nextSlot);
+          textureRefs.current[nextSlot] = texture;
+          fadingA.current = !fadingA.current;
+          fadeStartTimeRef.current = performance.now();
+          prevAdvanceRef.current = manualAdvance;
+          prevRewindRef.current = manualRewind;
+          // Always force a redraw after manual skip, even if paused
+          requestAnimationFrame(render);
+        });
+        return;
       }
+    }
 
+    // If not paused, proceed with fade logic and auto-advance
+    if (!state.isPaused) {
       // If an image load is pending, skip drawing until it finishes
       if (imageLoadPendingRef.current) {
         requestAnimationFrame(render);
@@ -513,7 +516,7 @@ export function CanvasComponent() {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
-      className='border-2 border-dashed border-[#24330D]'
+      className=''
       style={{ width: '100%', height: '100%', objectFit: 'cover'}}
     />
   );
