@@ -158,7 +158,7 @@ export function CanvasComponent() {
     const urls = availableTreeTypes.flatMap(tree => tree.images.map(img => img.url));
     return Promise.all(
       urls.map(url =>
-        preloadImage(url).catch(err => {
+        preloadImage(url).catch(() => {
           console.error("[Init] Skipping failed preload for", url);
           return null;
         })
