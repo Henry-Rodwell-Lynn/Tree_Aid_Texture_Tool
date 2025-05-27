@@ -152,7 +152,43 @@ export function CanvasComponent() {
     useEffectStore.getState().setExportTriggers(triggerImageExport, toggleRecording);
   }, []);
 
-  useEffect(() => {
+  // Preload all images from all tree types before initializing WebGL
+  const preloadAllImages = (): Promise<void> => {
+    console.log("[Init] Starting image preloading...");
+    const urls = availableTreeTypes.flatMap(tree => tree.images.map(img => img.url));
+    return Promise.all(
+      urls.map(url =>
+        preloadImage(url).catch(err => {
+          console.error("[Init] Skipping failed preload for", url);
+          return null;
+        })
+      )
+    ).then(() => {
+      console.log("[Init] Image preloading complete.");
+    });
+  };
+
+  // Wait for both shaders to be present in the DOM
+  function waitForShaders(): Promise<void> {
+    return new Promise((resolve) => {
+      const check = () => {
+        console.log("[Init] Waiting for shaders to appear in DOM...");
+        const vs = document.getElementById('vertex-shader')?.textContent;
+        const fs = document.getElementById('fragment-shader')?.textContent;
+        if (vs && fs) {
+          console.log("[Init] Shaders found in DOM.");
+          resolve();
+        } else {
+          requestAnimationFrame(check);
+        }
+      };
+      check();
+    });
+  }
+
+  // The WebGL initialization logic, moved from useEffect
+  function initWebGL() {
+    console.log("[Init] Running initWebGL...");
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext('webgl');
@@ -161,6 +197,7 @@ export function CanvasComponent() {
 
     const vertexShaderSource = document.getElementById('vertex-shader')?.textContent ?? '';
     const fragmentShaderSource = document.getElementById('fragment-shader')?.textContent ?? '';
+    console.log("[Init] Loaded shader sources. Vertex length:", vertexShaderSource.length, "Fragment length:", fragmentShaderSource.length);
     if (!vertexShaderSource || !fragmentShaderSource) {
       console.error('Shader sources could not be loaded.');
       return;
@@ -171,6 +208,7 @@ export function CanvasComponent() {
     const program = linkProgram(gl, vertShader, fragShader);
     gl.useProgram(program);
     programRef.current = program;
+    console.log("[Init] Shader program compiled and linked.");
 
     const quadVertices = new Float32Array([
       -1, -1, 0, 0,
@@ -229,15 +267,32 @@ export function CanvasComponent() {
       }
     }
 
+    console.log("[Init] Setup complete. Starting render loop.");
     requestAnimationFrame(render);
+  }
+
+  useEffect(() => {
+    preloadAllImages()
+      .then(() => waitForShaders())
+      .then(() => {
+        console.log("[Init] Shaders ready. Starting WebGL.");
+        initWebGL();
+      });
   }, []);
 
-  // Helper to preload an image and resolve when loaded
+  // Helper to preload an image and resolve when loaded, with per-image logging and error handling
   const preloadImage = (url: string): Promise<HTMLImageElement> =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       const image = new Image();
       image.crossOrigin = 'anonymous';
-      image.onload = () => resolve(image);
+      image.onload = () => {
+        console.log(`[Preload] Loaded: ${url}`);
+        resolve(image);
+      };
+      image.onerror = (err) => {
+        console.error(`[Preload] FAILED to load: ${url}`, err);
+        reject(err);
+      };
       image.src = url;
     });
 
@@ -249,6 +304,7 @@ export function CanvasComponent() {
   const prevRewindRef = useRef(0);
 
   const render = () => {
+    console.log("[Render] Frame start");
     const gl = glRef.current;
     const program = programRef.current;
     if (!gl || !program) return;

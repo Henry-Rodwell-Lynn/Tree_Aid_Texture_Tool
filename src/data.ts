@@ -81,11 +81,6 @@ export const treeTypes: TreeType[] = [
         url: "/assets/Tree_Bark_9.webp",
         altText: "Tree Bark",
       },
-      {
-        id: "TB10",
-        url: "/assets/Tree_Bark_10.webp",
-        altText: "Tree Bark",
-      },
     ],
   },
   {
